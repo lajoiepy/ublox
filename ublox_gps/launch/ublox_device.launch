@@ -20,5 +20,50 @@
         respawn_delay="$(arg respawn_delay)">
     <rosparam command="load"
               file="$(arg param_file_dir)/$(arg param_file_name).yaml" />
+    <remap from="/rtcm" to="/ublox_position_receiver/rtcm"/>
   </node>
+
+
+    <!-- This node relays the current NMEA $GPGGA position to the NTRIP caster and returns the RTCM corrections -->
+    <node name="ntrip_client" pkg="ntrip_client" type="ntrip_ros.py"
+          output="$(arg output)"
+          clear_params="$(arg clear_params)"
+          respawn="$(arg respawn)"
+          respawn_delay="$(arg respawn_delay)">
+
+
+    <!-- If this is set to true, we will read the username and password and attempt to authenticate. If not, we will attempt to connect unauthenticated -->
+    <param name="authenticate" value="true" />
+
+    <!-- Optional parameters that will allow for longer or shorter NMEA messages. Standard max length for NMEA is 82 -->
+    <param name="nmea_max_length" value="82" />
+    <param name="nmea_min_length" value="3" />
+
+
+    <!-- Will affect how many times the node will attempt to reconnect before exiting, and how long it will wait in between attempts when a reconnect occurs -->
+    <param name="reconnect_attempt_max" value="10" />
+    <param name="reconnect_attempt_wait_seconds" value="5" />
+
+    <!-- How many seconds is acceptable in between receiving RTCM. If RTCM is not received for this duration, the node will attempt to reconnect -->
+    <param name="rtcm_timeout_seconds" value="4" />
+
+
+        <param name="host"       value="192.168.1.151" />
+        <param name="port"       value="2101" />
+        <param name="mountpoint" value="pygnssutils" />
+	<param name="username"   value = "myuser" />
+  	<param name="password"   value = "mypassword" />
+	<param name="ntrip_version"          value = "3" />
+	<param name="ssl"                    value = "false" />
+	<param name="cert"                   value = "" />
+  	<param name="key"                    value = "" />
+  	<param name="ca_cert"                value = "" />
+  	<param name="rtcm_message_package"   value = "rtcm_msgs" />
+
+        <param name="rtcm_frame_id" value="position_receiver" />
+
+        <remap from="/rtcm" to="/ublox_position_receiver/rtcm" />
+        <remap from="/nmea" to="/ntrip_client/nmea" />
+    </node>
+
 </launch>
